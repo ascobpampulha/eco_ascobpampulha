@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoJaraguá | ASCOBPAMPULHA - Guia de Descarte Consciente e Coleta Seletiva (BH)</title>
+    <!-- Carregando Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonte Inter para máxima legibilidade e acessibilidade (IHC) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen selection:bg-emerald-200 selection:text-emerald-900">
+
+    <!-- Notificação Toast Flutuante (Substitui alert() seguindo boas práticas de IHC) -->
+    <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-3 border border-slate-700">
+            <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="toast-message" class="text-sm font-medium">Copiado!</span>
+        </div>
+    </div>
+
+    <!-- 1) Cabeçalho Institucional com Identidade da ASCOBPAMPULHA -->
+    <header class="bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900 text-white shadow-lg border-b border-emerald-700/40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-3">
+                    <!-- Selo da Associação Comunitária -->
+                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs sm:text-sm font-bold tracking-wide">
+                        <span aria-hidden="true" class="text-base">🏠</span>
+                        <span>ASCOBPAMPULHA • Associação Comunitária</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                        EcoJaraguá — Descarte Consciente e Coleta Seletiva
+                    </h1>
+
+                    <p class="text-emerald-100 text-sm sm:text-base font-medium max-w-3xl leading-relaxed">
+                        Iniciativa comunitária da <strong class="text-white">ASCOBPAMPULHA (Associação Comunitária dos Bairros Aeroporto, Jaraguá, Dona Clara, Liberdade e Adjacências)</strong> para facilitar o acesso aos pontos oficiais de descarte sustentável na região da Pampulha/Jaraguá em Belo Horizonte.
+                    </p>
+                </div>
+
+                <!-- Card de Resumo / Contador Dinâmico -->
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-5 flex items-center gap-4 self-start lg:self-center shrink-0">
+                    <div class="bg-emerald-500/25 p-3 rounded-xl text-emerald-300 border border-emerald-400/30">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-emerald-200 uppercase font-semibold tracking-wider">Pontos Mapeados</p>
+                        <p id="total-counter" class="text-2xl font-extrabold text-white">6 unidades</p>
+                        <p class="text-xs text-emerald-300/90">Regional Pampulha / BH</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <!-- 2) Campo de Busca em Tempo Real e Botões de Filtro por Categoria -->
+        <section aria-label="Busca e filtros de pontos de coleta" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-5">
+            <div>
+                <label for="search-input" class="block text-sm font-bold text-slate-800 mb-2">
+                    Buscar ponto de descarte por bairro, rua ou material:
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Ex: entulho, óleo, pilhas, recicláveis, Jaraguá, Pampulha, Castelo, Santa Terezinha..." 
+                        class="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 transition text-sm sm:text-base"
+                    >
+                    <button 
+                        id="clear-search" 
+                        type="button" 
+                        aria-label="Limpar busca"
+                        class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 cursor-pointer"
+                    >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botões de Filtro Rápido por Categoria -->
+            <div>
+                <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2.5">
+                    Filtrar por categoria de descarte:
+                </span>
+                <div id="filter-buttons" class="flex flex-wrap gap-2" role="group" aria-label="Filtros por categoria">
+                    <button type="button" data-category="Todos" class="filter-btn active px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer bg-emerald-700 text-white shadow-sm">
+                        Todos
+                    </button>
+                    <button type="button" data-category="URPV / Entulho e Volumosos" class="filter-btn px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        URPV / Entulho e Volumosos
+                    </button>
+                    <button type="button" data-category="Óleo de Cozinha" class="filter-btn px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        Óleo de Cozinha
+                    </button>
+                    <button type="button" data-category="Eletrônicos e Pilhas" class="filter-btn px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        Eletrônicos e Pilhas
+                    </button>
+                    <button type="button" data-category="Coleta Seletiva / Recicláveis" class="filter-btn px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        Coleta Seletiva / Recicláveis
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3) Grade de Cards Renderizada a partir do Array JSON -->
+        <section aria-label="Unidades de coleta e descarte" class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Unidades e Pontos de Entrega na Região</h2>
+                    <p class="text-xs sm:text-sm text-slate-600">Atendimento aos moradores dos bairros Aeroporto, Jaraguá, Dona Clara, Liberdade e adjacências</p>
+                </div>
+                <span id="results-count" class="text-sm font-semibold text-slate-700 bg-slate-200/80 px-3.5 py-1 rounded-full self-start sm:self-center shrink-0">
+                    Carregando...
+                </span>
+            </div>
+
+            <!-- Grid Responsivo de Cards -->
+            <div id="locations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards injetados via JavaScript -->
+            </div>
+
+            <!-- Estado Vazio (Quando nenhum resultado corresponde à busca) -->
+            <div id="empty-state" class="hidden bg-white rounded-2xl border border-slate-200 p-10 text-center space-y-3">
+                <div class="mx-auto w-14 h-14 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Nenhum ponto encontrado para essa pesquisa</h3>
+                <p class="text-sm text-slate-600 max-w-md mx-auto">
+                    Tente buscar por termos como "Pampulha", "entulho", "óleo", "eletrônicos", "recicláveis" ou clique em "Todos" para exibir todas as unidades.
+                </p>
+                <button id="reset-filters-btn" type="button" class="mt-2 inline-flex items-center px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition cursor-pointer">
+                    Exibir todos os pontos
+                </button>
+            </div>
+        </section>
+
+        <!-- 4) Seção com as Regras Oficiais da SLU/PBH -->
+        <section aria-label="Regras Oficiais da SLU/PBH" class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-md border border-slate-800 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/80 pb-4">
+                <div>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Orientação Comunitária ASCOBPAMPULHA &amp; SLU
+                    </span>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-1">
+                        Regras Oficiais da SLU / PBH para Descarte
+                    </h2>
+                </div>
+                <span class="px-3 py-1.5 rounded-lg bg-emerald-950 border border-emerald-700 text-emerald-300 text-xs font-bold self-start sm:self-auto">
+                    Uso Gratuito pelo Cidadão
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Regra 1: Limite de 1m³ -->
+                <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-5 space-y-2.5">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-extrabold text-sm border border-emerald-500/30">
+                        1m³
+                    </div>
+                    <h3 class="font-bold text-base text-white">Limite Diário de 1m³ por Cidadão</h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        Cada morador pode descartar gratuitamente até <strong>1 metro cúbico (1m³) por dia</strong> de entulho limpo, terra, poda de árvore ou móveis velhos (equivalente a cerca de 20 sacos de 50 litros).
+                    </p>
+                </div>
+
+                <!-- Regra 2: Proibição de Lixo Doméstico e Hospitalar -->
+                <div class="bg-slate-800/90 border border-rose-700/50 rounded-xl p-5 space-y-2.5">
+                    <div class="w-10 h-10 rounded-lg bg-rose-500/20 text-rose-300 flex items-center justify-center border border-rose-500/30">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-base text-white">Proibido Lixo Doméstico ou Hospitalar</h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        É <strong>expressamente proibido</strong> o descarte de lixo doméstico comum (orgânico/banheiro), resíduos hospitalares, animais mortos, amianto ou produtos químicos nas URPVs.
+                    </p>
+                </div>
+
+                <!-- Regra 3: Coleta Domiciliar e Segurança -->
+                <div class="bg-slate-800/90 border border-amber-700/50 rounded-xl p-5 space-y-2.5">
+                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-extrabold text-sm border border-amber-500/30">
+                        +18
+                    </div>
+                    <h3 class="font-bold text-base text-white">Segurança e Separação Prévia</h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        Não é permitida a entrada de menores de 18 anos nas URPVs. Traga os resíduos separados por tipo para agilizar a descarga nas caçambas específicas.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5) Seção de Canais e Links Oficiais da Prefeitura de Belo Horizonte -->
+        <section aria-label="Canais e Links Oficiais da Prefeitura de Belo Horizonte" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+            <div class="space-y-1">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Transparência e Serviços Públicos</span>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                    Canais e Links Oficiais da Prefeitura de Belo Horizonte
+                </h2>
+                <p class="text-sm text-slate-600">
+                    Acesse diretamente os portais governamentais da PBH para consultar horários da coleta domiciliar, solicitar serviços urbanos ou verificar atualizações da SLU.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Link 1: Portal PBH -->
+                <a 
+                    href="https://prefeitura.pbh.gov.br" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="group flex flex-col justify-between p-5 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-400 transition-all duration-200"
+                >
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-200 text-slate-800 group-hover:bg-emerald-100 group-hover:text-emerald-900 transition">
+                                Portal Oficial
+                            </span>
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-emerald-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 group-hover:text-emerald-800">Portal PBH</h3>
+                        <p class="text-xs sm:text-sm text-slate-600">
+                            Site oficial da Prefeitura de Belo Horizonte com notícias, serviços ao cidadão e informações das regionais.
+                        </p>
+                    </div>
+                    <p class="mt-4 text-xs font-semibold text-emerald-700">prefeitura.pbh.gov.br →</p>
+                </a>
+
+                <!-- Link 2: Limpeza Urbana SLU -->
+                <a 
+                    href="https://prefeitura.pbh.gov.br/slu" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="group flex flex-col justify-between p-5 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-400 transition-all duration-200"
+                >
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-900">
+                                Coleta e URPVs
+                            </span>
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-emerald-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 group-hover:text-emerald-800">Limpeza Urbana SLU</h3>
+                        <p class="text-xs sm:text-sm text-slate-600">
+                            Superintendência de Limpeza Urbana: mapa completo de URPVs, coleta seletiva e dias de recolhimento.
+                        </p>
+                    </div>
+                    <p class="mt-4 text-xs font-semibold text-emerald-700">prefeitura.pbh.gov.br/slu →</p>
+                </a>
+
+                <!-- Link 3: PBH APP -->
+                <a 
+                    href="https://prefeitura.pbh.gov.br/pbhapp" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="group flex flex-col justify-between p-5 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-400 transition-all duration-200"
+                >
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-sky-100 text-sky-900">
+                                Atendimento Digital
+                            </span>
+                            <svg class="w-5 h-5 text-slate-400 group-hover:text-emerald-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 group-hover:text-emerald-800">PBH APP</h3>
+                        <p class="text-xs sm:text-sm text-slate-600">
+                            Aplicativo oficial para solicitar recolhimento de resíduos, limpeza de vias e atendimento 156 pelo celular.
+                        </p>
+                    </div>
+                    <p class="mt-4 text-xs font-semibold text-emerald-700">prefeitura.pbh.gov.br/pbhapp →</p>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 6) Rodapé Creditando o Projeto Extensionista de Ciência da Computação em Parceria com a ASCOBPAMPULHA -->
+    <footer class="bg-slate-950 text-slate-300 border-t border-slate-800 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="space-y-1.5">
+                    <p class="text-white font-bold text-sm sm:text-base">
+                        Projeto de Extensão Universitária — Bacharelado em Ciência da Computação em parceria com a ASCOBPAMPULHA
+                    </p>
+                    <p class="text-xs sm:text-sm text-slate-400">
+                        Associação Comunitária dos Bairros Aeroporto, Jaraguá, Dona Clara, Liberdade e Adjacências • Belo Horizonte - MG
+                    </p>
+                </div>
+                <div class="text-xs text-slate-400 md:text-right space-y-1 shrink-0">
+                    <p class="text-emerald-400 font-semibold">Sustentabilidade Urbana (ODS 11)</p>
+                    <p>Base informativa: Dados Públicos SLU / PBH</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lógica JavaScript Pura (ES6+) -->
+    <script>
+        /**
+         * Base de dados estruturada em JSON com as unidades oficiais da SLU/PBH
+         * e pontos de coleta seletiva próximos à região da ASCOBPAMPULHA (Jaraguá e Pampulha).
+         */
+        const pontosDescarte = [
+            {
+                id: 1,
+                nome: "URPV Pampulha (Av. Portugal)",
+                bairro: "Santa Amélia / Pampulha",
+                endereco: "Av. Portugal, 4.745 - Santa Amélia / Região da Pampulha, Belo Horizonte - MG",
+                horario: "Segunda a Sábado, 8h às 16h",
+                categorias: ["URPV / Entulho e Volumosos"],
+                materiais: "Entulho limpo de pequenas obras (até 1m³/dia), terra, podas de árvores, madeiras, móveis velhos e pneus (até 4 unidades/dia).",
+                mapsQuery: "Av. Portugal 4745 Pampulha Belo Horizonte MG"
+            },
+            {
+                id: 2,
+                nome: "URPV Santa Terezinha",
+                bairro: "Santa Terezinha / Pampulha",
+                endereco: "Rua Julita Nogueira Soares, 1.000 - Santa Terezinha, Belo Horizonte - MG",
+                horario: "Segunda a Sábado, 8h às 16h",
+                categorias: ["URPV / Entulho e Volumosos"],
+                materiais: "Entulho de construção (até 1m³/dia), resíduos de poda, objetos volumosos, metais e pneus inservíveis.",
+                mapsQuery: "Rua Julita Nogueira Soares 1000 Santa Terezinha Belo Horizonte MG"
+            },
+            {
+                id: 3,
+                nome: "URPV Castelo",
+                bairro: "Castelo / Pampulha",
+                endereco: "Rua Castelo de Guimarães, 420 - Castelo, Belo Horizonte - MG",
+                horario: "Segunda a Sábado, 8h às 16h",
+                categorias: ["URPV / Entulho e Volumosos"],
+                materiais: "Pequenos volumes de entulho (até 1m³/dia), podas de jardim, madeiras, sofás e móveis sem uso.",
+                mapsQuery: "Rua Castelo de Guimaraes 420 Castelo Belo Horizonte MG"
+            },
+            {
+                id: 4,
+                nome: "URPV São Luiz / Itatiaia (Região Av. Fleming)",
+                bairro: "São Luiz / Itatiaia",
+                endereco: "Região da Av. Fleming / Rua Itatiaia - São Luiz, Pampulha, Belo Horizonte - MG",
+                horario: "Segunda a Sábado, 8h às 16h",
+                categorias: ["URPV / Entulho e Volumosos"],
+                materiais: "Entulho limpo, podas, volumosos, pneus (até 4/dia) e sucata metálica (limite de 1m³ por dia).",
+                mapsQuery: "Av Fleming Sao Luiz Pampulha Belo Horizonte MG"
+            },
+            {
+                id: 5,
+                nome: "LEV / PEV Coleta Seletiva Pampulha (Jaraguá / Liberdade)",
+                bairro: "Jaraguá / Liberdade / Pampulha",
+                endereco: "Av. Reitor Mendes Pimentel (Acesso Av. Antônio Carlos) - Pampulha / Entorno Jaraguá, Belo Horizonte - MG",
+                horario: "Segunda a Sábado, 8h às 16h",
+                categorias: ["Coleta Seletiva / Recicláveis"],
+                materiais: "Papel, papelão, garrafas PET, plásticos em geral, latas de alumínio, metais e embalagens de vidro limpas.",
+                mapsQuery: "Av Reitor Mendes Pimentel Pampulha Belo Horizonte MG"
+            },
+            {
+                id: 6,
+                nome: "Ponto de Entrega Voluntária — Óleo de Cozinha e Eletrônicos",
+                bairro: "Jaraguá / Dona Clara / Aeroporto",
+                endereco: "Av. Sebastião de Brito / Entorno Praça do Jaraguá - Jaraguá, Belo Horizonte - MG",
+                horario: "Segunda a Sábado, 8h às 16h",
+                categorias: ["Óleo de Cozinha", "Eletrônicos e Pilhas"],
+                materiais: "Óleo de cozinha usado (envasado em garrafa PET fechada), pilhas, baterias, celulares antigos, cabos e pequenos eletroeletrônicos.",
+                mapsQuery: "Av Sebastiao de Brito Jaragua Belo Horizonte MG"
+            }
+        ];
+
+        // Estado atual dos filtros
+        let activeCategory = "Todos";
+        let searchQuery = "";
+
+        // Referências aos elementos do DOM
+        const gridEl = document.getElementById("locations-grid");
+        const emptyStateEl = document.getElementById("empty-state");
+        const resultsCountEl = document.getElementById("results-count");
+        const totalCounterEl = document.getElementById("total-counter");
+        const searchInputEl = document.getElementById("search-input");
+        const clearSearchBtn = document.getElementById("clear-search");
+        const resetFiltersBtn = document.getElementById("reset-filters-btn");
+        const filterBtns = document.querySelectorAll(".filter-btn");
+        const toastEl = document.getElementById("toast");
+        const toastMessageEl = document.getElementById("toast-message");
+        let toastTimer;
+
+        /**
+         * Define as cores das tags de cada categoria para fácil leitura visual
+         */
+        function getBadgeStyle(categoria) {
+            switch (categoria) {
+                case "URPV / Entulho e Volumosos":
+                    return "bg-amber-100 text-amber-900 border-amber-300";
+                case "Óleo de Cozinha":
+                    return "bg-yellow-100 text-yellow-900 border-yellow-300";
+                case "Eletrônicos e Pilhas":
+                    return "bg-sky-100 text-sky-900 border-sky-300";
+                case "Coleta Seletiva / Recicláveis":
+                    return "bg-emerald-100 text-emerald-900 border-emerald-300";
+                default:
+                    return "bg-slate-100 text-slate-800 border-slate-300";
+            }
+        }
+
+        /**
+         * Remove acentos e converte para minúsculas para busca fluida
+         */
+        function normalizeText(str) {
+            return str
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+        }
+
+        /**
+         * Exibe notificação Toast acessível no canto inferior
+         */
+        function showToast(msg) {
+            toastMessageEl.textContent = msg;
+            toastEl.classList.remove("translate-y-24", "opacity-0");
+            toastEl.classList.add("translate-y-0", "opacity-100");
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toastEl.classList.remove("translate-y-0", "opacity-100");
+                toastEl.classList.add("translate-y-24", "opacity-0");
+            }, 2500);
+        }
+
+        /**
+         * Copia o endereço para a área de transferência (compatível com iFrame via execCommand)
+         * e exibe o feedback visual 'Copiado!' no botão
+         */
+        function copyAddress(endereco, nomeLocal, buttonEl) {
+            const textArea = document.createElement("textarea");
+            textArea.value = `${nomeLocal} - ${endereco}`;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand("copy");
+                showToast("Copiado! Endereço pronto para colar.");
+
+                const originalHTML = buttonEl.innerHTML;
+                buttonEl.classList.remove("bg-white", "text-slate-800", "border-slate-300");
+                buttonEl.classList.add("bg-emerald-100", "text-emerald-900", "border-emerald-400");
+                buttonEl.innerHTML = `
+                    <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>Copiado!</span>
+                `;
+
+                setTimeout(() => {
+                    buttonEl.classList.remove("bg-emerald-100", "text-emerald-900", "border-emerald-400");
+                    buttonEl.classList.add("bg-white", "text-slate-800", "border-slate-300");
+                    buttonEl.innerHTML = originalHTML;
+                }, 2000);
+            } catch (error) {
+                showToast("Não foi possível copiar o endereço.");
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        /**
+         * Filtra os pontos do JSON e renderiza os cards na grade responsiva
+         */
+        function renderCards() {
+            const query = normalizeText(searchQuery.trim());
+
+            const filteredPoints = pontosDescarte.filter(ponto => {
+                const matchesCategory = activeCategory === "Todos" || ponto.categorias.includes(activeCategory);
+                if (!matchesCategory) return false;
+
+                if (!query) return true;
+
+                const fullText = normalizeText(
+                    `${ponto.nome} ${ponto.bairro} ${ponto.endereco} ${ponto.materiais} ${ponto.categorias.join(" ")}`
+                );
+                return fullText.includes(query);
+            });
+
+            totalCounterEl.textContent = `${pontosDescarte.length} unidades`;
+            resultsCountEl.textContent = filteredPoints.length === 1
+                ? "1 ponto encontrado"
+                : `${filteredPoints.length} pontos encontrados`;
+
+            gridEl.innerHTML = "";
+
+            if (filteredPoints.length === 0) {
+                gridEl.classList.add("hidden");
+                emptyStateEl.classList.remove("hidden");
+                return;
+            }
+
+            gridEl.classList.remove("hidden");
+            emptyStateEl.classList.add("hidden");
+
+            filteredPoints.forEach(ponto => {
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ponto.mapsQuery)}`;
+
+                const badgesHTML = ponto.categorias.map(cat => {
+                    const style = getBadgeStyle(cat);
+                    return `<span class="inline-block px-2.5 py-1 rounded-md text-xs font-bold border ${style}">${cat}</span>`;
+                }).join("");
+
+                const card = document.createElement("article");
+                card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between overflow-hidden";
+
+                card.innerHTML = `
+                    <div class="p-5 sm:p-6 space-y-4">
+                        <!-- Tag de Bairro -->
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                <svg class="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                ${ponto.bairro}
+                            </span>
+                        </div>
+
+                        <!-- Nome do Ponto -->
+                        <h3 class="text-lg font-extrabold text-slate-900 leading-snug">
+                            ${ponto.nome}
+                        </h3>
+
+                        <!-- Categorias -->
+                        <div class="flex flex-wrap gap-1.5">
+                            ${badgesHTML}
+                        </div>
+
+                        <!-- Endereço, Horário e Materiais Aceitos -->
+                        <div class="space-y-3 text-sm text-slate-700 pt-1">
+                            <div class="flex items-start gap-2.5">
+                                <svg class="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span><strong class="text-slate-900">Endereço:</strong> ${ponto.endereco}</span>
+                            </div>
+
+                            <div class="flex items-start gap-2.5">
+                                <svg class="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span><strong class="text-slate-900">Funcionamento:</strong> ${ponto.horario}</span>
+                            </div>
+
+                            <div class="flex items-start gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                                <svg class="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span><strong class="text-slate-900">Materiais aceitos:</strong> ${ponto.materiais}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row gap-2.5">
+                        <a 
+                            href="${mapsUrl}" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition shadow-sm"
+                        >
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Ver Rota no Maps</span>
+                        </a>
+                        <button 
+                            type="button"
+                            data-address="${ponto.endereco}"
+                            data-name="${ponto.nome}"
+                            class="copy-btn inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-sm font-semibold rounded-xl transition cursor-pointer"
+                        >
+                            <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Copiar Endereço</span>
+                        </button>
+                    </div>
+                `;
+
+                gridEl.appendChild(card);
+            });
+
+            // Eventos para os botões de copiar endereço
+            document.querySelectorAll(".copy-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    copyAddress(
+                        btn.getAttribute("data-address"),
+                        btn.getAttribute("data-name"),
+                        btn
+                    );
+                });
+            });
+        }
+
+        // Evento de busca em tempo real
+        searchInputEl.addEventListener("input", (e) => {
+            searchQuery = e.target.value;
+            clearSearchBtn.classList.toggle("hidden", searchQuery.length === 0);
+            renderCards();
+        });
+
+        // Evento de limpar busca
+        clearSearchBtn.addEventListener("click", () => {
+            searchInputEl.value = "";
+            searchQuery = "";
+            clearSearchBtn.classList.add("hidden");
+            searchInputEl.focus();
+            renderCards();
+        });
+
+        // Eventos dos botões de filtro por categoria
+        filterBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                filterBtns.forEach(b => {
+                    b.classList.remove("bg-emerald-700", "text-white", "shadow-sm");
+                    b.classList.add("bg-slate-100", "text-slate-700", "hover:bg-slate-200");
+                });
+                btn.classList.remove("bg-slate-100", "text-slate-700", "hover:bg-slate-200");
+                btn.classList.add("bg-emerald-700", "text-white", "shadow-sm");
+
+                activeCategory = btn.getAttribute("data-category");
+                renderCards();
+            });
+        });
+
+        // Restaurar filtros no estado vazio
+        resetFiltersBtn.addEventListener("click", () => {
+            searchInputEl.value = "";
+            searchQuery = "";
+            clearSearchBtn.classList.add("hidden");
+            activeCategory = "Todos";
+
+            filterBtns.forEach(b => {
+                if (b.getAttribute("data-category") === "Todos") {
+                    b.classList.remove("bg-slate-100", "text-slate-700", "hover:bg-slate-200");
+                    b.classList.add("bg-emerald-700", "text-white", "shadow-sm");
+                } else {
+                    b.classList.remove("bg-emerald-700", "text-white", "shadow-sm");
+                    b.classList.add("bg-slate-100", "text-slate-700", "hover:bg-slate-200");
+                }
+            });
+
+            renderCards();
+        });
+
+        // Inicializa a renderização ao carregar a página
+        document.addEventListener("DOMContentLoaded", renderCards);
+    </script>
+</body>
+</html>
